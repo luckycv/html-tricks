@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ballot Box</title>
+  <style>
+    #ballotBox {
+      width: 300px;
+      height: 200px;
+      border: 1px solid black;
+      position: relative;
+    }
+
+    .option {
+      width: 50px;
+      height: 50px;
+      background-color: lightblue;
+      margin-right: 10px;
+      display: inline-block;
+    }
+  </style>
+</head>
+<body>
+  <button id="start">Start</button>
+  <div id="ballotBox"></div>
+
+  <script>
+    const ballotBox = document.getElementById('ballotBox');
+    const startButton = document.getElementById('start');
+    let intervalId;
+    let options = ['A', 'B', 'C', 'D', 'E'];
+    let currentOptionIndex = 0;
+
+    function createOption(option) {
+      const div = document.createElement('div');
+      div.classList.add('option');
+      div.innerText = option;
+      return div;
+    }
+
+    function moveOptions() {
+      if (currentOptionIndex >= options.length) {
+        clearInterval(intervalId);
+        alert('Voting is over!');
+        return;
+      }
+
+      const option = createOption(options[currentOptionIndex]);
+      ballotBox.appendChild(option);
+
+      let left = 300; // Ballot Box width
+      function move() {
+        if (left <= 0) {
+          currentOptionIndex++;
+          return;
+        }
+        left -= 10;
+        option.style.left = `${left}px`;
+        requestAnimationFrame(move);
+      }
+
+      move();
+    }
+
+    startButton.addEventListener('click', () => {
+      intervalId = setInterval(moveOptions, 3000);
+    });
+  </script>
+</body>
+</html>
