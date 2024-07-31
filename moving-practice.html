@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Moving Practice</title>
+  <style>
+    #gameArea {
+      width: 200px;
+      height: 200px;
+      border: 1px solid black;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .player,
+    .enemy {
+      position: absolute;
+    }
+
+    .player {
+      width: 50px;
+      height: 50px;
+      background-color: lightblue;
+    }
+
+    .enemy {
+      width: 30px;
+      height: 30px;
+      background-color: lightcoral;
+    }
+  </style>
+</head>
+<body>
+  <div id="gameArea"></div>
+  <div id="score">Score: 0</div>
+
+  <script>
+    const gameArea = document.getElementById('gameArea');
+    const scoreDisplay = document.getElementById('score');
+    let player;
+    let enemies = [];
+    let intervalId;
+    let score = 0;
+
+    function createPlayer() {
+      const div = document.createElement('div');
+      div.classList.add('player');
+      div.style.left = '0px';
+      div.style.top = '0px';
+      gameArea.appendChild(div);
+      return div;
+    }
+
+    function createEnemy() {
+      const div = document.createElement('div');
+      div.classList.add('enemy');
+      div.style.left = `${Math.random() * 170}px`;
+      div.style.top = `${Math.random() * 170}px`;
+      gameArea.appendChild(div);
+      return div;
+    }
+
+    function movePlayer(dx, dy) {
+      const left = parseInt(player.style.left) + dx;
+      const top = parseInt(player.style.top) + dy;
+
+      if (left >= 0 && left <= 150 && top >= 0 && top <= 150) {
+        player.style.left = `${left}px`;
+        player.style.top = `${top}px`;
+      }
+    }
+
+    function checkCollision() {
+      for (const enemy of enemies) {
+        if (
+          parseInt(player.style.left) < parseInt(enemy.style.left) + 30 &&
+          parseInt(player.style.left) + 50 > parseInt(enemy.style.left) &&
+          parseInt(player.style.top) < parseInt(enemy.style.top) + 30 &&
+          parseInt(player.style.top) + 50 > parseInt(enemy.style.top)
+        ) {
+          gameOver();
+        }
+      }
+    }
+
+    function generateEnemy() {
+      const enemy = createEnemy();
+      enemies.push(enemy);
+    }
+
+    function startGame() {
+      player = createPlayer();
+      intervalId = setInterval(generateEnemy, 5000);
+      document.addEventListener('keydown', handleKeyDown);
+      updateScore();
+    }
+
+    function gameOver() {
+      clearInterval(intervalId);
+      document.removeEventListener('keydown', handleKeyDown);
+      alert(`Game Over! Your score was ${score}.`);
+      location.reload();
+    }
+
+    function updateScore() {
+      score++;
+      scoreDisplay.innerText = `Score: ${score}`;
+    }
+
+    function handleKeyDown(event) {
+      switch (event.keyCode) {
+        case 37:
+          movePlayer(-10, 0);
+          break;
+        case 38:
+          movePlayer(0, -10);
+          break;
+        case 39:
+          movePlayer(10, 0);
+          break;
+        case 40:
+          movePlayer(0, 10);
+          break;
+      }
+      checkCollision();
+      updateScore();
+    }
+
+    startGame();
+  </script>
+</body>
+</html>
