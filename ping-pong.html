@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ping Pong Game</title>
+  <style>
+    canvas {
+      display: block;
+      background-color: #333;
+    }
+    .paddle {
+      width: 10px;
+      height: 80px;
+      background-color: #fff;
+      position: absolute;
+      transform-origin: center bottom;
+    }
+    .player-paddle {
+      left: 20px;
+    }
+    .computer-paddle {
+      right: 20px;
+      transform: rotate(180deg);
+    }
+    .ball {
+      width: 20px;
+      height: 20px;
+      background-color: #fff;
+      border-radius: 50%;
+      position: absolute;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="gameCanvas" width="600" height="400"></canvas>
+  <script>
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+
+    // Game elements
+    let playerPaddle, computerPaddle, ball;
+    let playerScore = 0, computerScore = 0;
+    const paddleWidth = 10, paddleHeight = 80;
+    const ballSize = 20;
+    const paddleSpeed = 10;
+
+    // Initialize game
+    function init() {
+      playerPaddle = {
+        x: 20,
+        y: canvas.height / 2 - paddleHeight / 2,
+        width: paddleWidth,
+        height: paddleHeight
+      };
+
+      computerPaddle = {
+        x: canvas.width - paddleWidth - 20,
+        y: canvas.height / 2 - paddleHeight / 2,
+        width: paddleWidth,
+        height: paddleHeight
+      };
+
+      ball = {
+        x: canvas.width / 2 - ballSize / 2,
+        y: canvas.height / 2 - ballSize / 2,
+        dx: Math.random() < 0.5 ? -1 : 1,
+        dy: Math.random() < 0.5 ? -1 : 1,
+        speed: 5
+      };
+
+      draw();
+    }
+
+    // Draw elements on canvas
+    function draw() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      // Draw paddles
+      ctx.fillStyle = '#fff';
+      ctx.fillRect(playerPaddle.x, playerPaddle.y, playerPaddle.width, playerPaddle.height);
+      ctx.fillRect(computerPaddle.x, computerPaddle.y, computerPaddle.width, computerPaddle.height);
+
+      // Draw ball
+      ctx.beginPath();
+      ctx.arc(ball.x + ballSize / 2, ball.y + ballSize / 2, ballSize / 2, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Draw scores
+      ctx.fillText(`Player: ${playerScore}`, 20, 20);
+      ctx.fillText(`Computer: ${computerScore}`, canvas.width - 120, 20);
+    }
+
+    // Update game state
+    function update() {
+      // Update ball position
+      ball.x += ball.dx * ball.speed;
+      ball.y += ball.dy * ball.speed;
+
+      // Check ball collisions with top and bottom walls
+      if (ball.y <= 0 || ball.y + ballSize >= canvas.height) {
+        ball.dy *= -1;
+      }
+
+      // Check ball collisions with paddles
+      if (ball.x <= playerPaddle.x + playerPaddle.width && ball.y >= playerPaddle.y && ball.y <= playerPaddle.y + playerPaddle.height) {
+        ball.dx *= -1;
+      }
+
+      if (ball.x + ballSize >= computerPaddle.x && ball.y >= computerPaddle.y && ball.y <= computerPaddle.y + computerPaddle.height) {
+        ball.dx *= -1;
+      }
+
+      // Check if ball goes out of bounds (scores)
+      if (ball.x <= 0) {
+        computerScore++;
+        resetBall();
+      } else if (ball.x + ballSize >= canvas.width) {
+        playerScore++;
+        resetBall();
+      }
+
+      // Update computer paddle position (basic AI)
+      if (ball.y > computerPaddle.y + computerPaddle.height / 2) {
+        computerPaddle.y += paddleSpeed;
+      } else {
+        computerPaddle.y -= paddleSpeed;
+      }
+
+      // Redraw elements
+      draw();
+
+      // Check for game over condition
+      if (playerScore >= 10 || computerScore >= 10) {
+        gameOver();
+        return;
+      }
+
+      // Continue game loop
+      requestAnimationFrame(update);
+    }
+
+    // Reset ball position
+    function resetBall() {
+      ball.x = canvas.width / 2 - ballSize / 2;
+      ball.y = canvas.height / 2 - ballSize / 2;
+    }
+
+    // Handle game over
+    function gameOver() {
+      alert(`Game Over! Player: ${playerScore}, Computer: ${computerScore}`);
+      playerScore = 0;
+      computerScore = 0;
+      resetBall();
+      init();
+    }
+
+    // Listen for keyboard events
+    document.addEventListener('keydown', function(event) {
+      if (event.key === 'w' && playerPaddle.y > 0) {
+        playerPaddle.y -= paddleSpeed;
+      } else if (event.key === 's' && playerPaddle.y + playerPaddle.height < canvas.height) {
+        playerPaddle.y += paddleSpeed;
+      }
+    });
+
+    // Initialize game
+    init();
+
+    // Start game loop
+    update();
+  </script>
+</body>
+</html>
